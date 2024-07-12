@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>準同型暗号体験サイト</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #ff6b6b;
+            font-size: 28px;
+        }
+        input {
+            font-size: 18px;
+            padding: 10px;
+            width: 100px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45b7aa;
+        }
+        #result {
+            font-size: 24px;
+            color: #ff6b6b;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>じゅんどうけいあんごうを体験してみよう！</h1>
+        <input type="number" id="numberInput" placeholder="数字を入力">
+        <button id="encryptButton">あんごうか！</button>
+        <div id="result"></div>
+    </div>
+
+<py-script>
+    import math
+    from pyodide.ffi import to_js
+    from js import document, console
+    from random import randint
+
+    def getRandomRange(start, end):
+        return randint(start, end - 1)
+    
+    def paillier_encrypt(m, pk):
+        n, g = pk
+        nn = n * n
+        assert(0 <= m < n)
+        while True:
+            r = getRandomRange(2, n)
+            if math.gcd(r, n) == 1:
+                break
+        return (pow(g, m, nn) * pow(r, n, nn)) % nn
+
+    def encrypt_button_click(event):
+        m = int(document.getElementById("numberInput").value)
+        n = 411112927
+        g = 31159722759783772
+        pk = (n, g)
+        encrypted_message = paillier_encrypt(m, pk)
+        document.getElementById("result").innerText = f"あんごうかできたよ！{hex(encrypted_message)}"
+
+    encrypt_button = document.getElementById("encryptButton")
+    encrypt_button.addEventListener("click", to_js(encrypt_button_click))
+</py-script>
+
+</body>
+</html>
